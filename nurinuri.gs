@@ -78,7 +78,7 @@ function nurinuri(){
   }
 
   // 一括書き込み
-  const range = target.getRange(row_min, col_min, row_num, col_num);
+  const range = activeSheet.getRange(row_min, col_min, row_num, col_num);
   range.setBackgrounds(bgout);
   range.setValues(valout);
   range.setFontColors(fontout);
