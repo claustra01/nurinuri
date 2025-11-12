@@ -23,11 +23,16 @@ function nurinuri(){
     b.push(Array(row_num).fill(0.0));
     num.push(Array(row_num).fill(0));
   }
+
+  sheets = spreadSheet.getSheets()
   for (var s = 1; s < sheets.length; s++) {
-    sheet = spreadSheet.getSheetByName(sheets[s]);
-    for (var col = 0; col < col_num; col++) {
-      for (var row = 0; row < row_num; row++) {
-        var bgcolor = sheet.getRange(row_min + row, col_min + col).getBackground();
+    const sheet = sheets[s];
+    // 一括読み込み
+    const bg = sheet.getRange(row_min, col_min, row_max, col_max).getBackgrounds(); // bg[row][col]
+
+    for (var row = 0; row < row_num; row++) {
+      for (var col = 0; col < col_num; col++) {
+        var bgcolor = bg[row][col];
         if (bgcolor != "#ffffff") {
           num[col][row] = num[col][row] + 1;
         }
@@ -40,8 +45,17 @@ function nurinuri(){
       }
     }
   }
-  for (var col = 0; col < col_num; col++) {
-    for (var row = 0; row < row_num; row++) {
+
+  let bgout = [];
+  let valout = [];
+  let fontout = [];
+
+  for (var row = 0; row < row_num; row++) {
+    bgout[row] = [];
+    valout[row] = [];
+    fontout[row] = [];
+
+    for (var col = 0; col < col_num; col++) {
       r[col][row] = r[col][row] / (sheets.length - 1);
       g[col][row] = g[col][row] / (sheets.length - 1);
       b[col][row] = b[col][row] / (sheets.length - 1);
@@ -54,9 +68,18 @@ function nurinuri(){
       var complementRGB = '#' + Math.floor(minmax - r[col][row]).toString(16).padStart(2, '0');
       complementRGB = complementRGB + Math.floor(minmax - g[col][row]).toString(16).padStart(2, '0');
       complementRGB = complementRGB + Math.floor(minmax - b[col][row]).toString(16).padStart(2, '0');
+      bgout[row][col] = averagedRGB;
+      valout[row][col] = num[col][row];
+      fontout[row][col] = complementRGB;
       activeSheet.getRange(row_min + row, col_min + col).setBackground(averagedRGB);
       activeSheet.getRange(row_min + row, col_min + col).setValue(num[col][row]);
       activeSheet.getRange(row_min + row, col_min + col).setFontColor(complementRGB);
     }
   }
+
+  // 一括書き込み
+  const range = target.getRange(row_min, col_min, row_num, col_num);
+  range.setBackgrounds(bgout);
+  range.setValues(valout);
+  range.setFontColors(fontout);
 }
